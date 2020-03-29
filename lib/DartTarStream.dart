@@ -4,12 +4,30 @@ import 'TarFile.dart';
 
 Stream<TarFile> createStream(Stream<List<int>> stream) async* {
   final reader = ChunkedStreamIterator(stream);
-  final headerBytes = await reader.read(512);
-  var file = _parseHeader(headerBytes);
-  yield file;
+  var empty_records = 0;
+  while (true) {
+    final headerBytes = await reader.read(512);
+    if (_isRecordEmpty(headerBytes) && headerBytes.isNotEmpty) {
+      empty_records++;
+      continue;
+    }
+    if (empty_records == 2) {
+      break;
+    }
+    if (headerBytes.length != 512) {
+      throw Exception('Invalid record length');
+    }
+    var file = _createFile(headerBytes);
+    yield file;
+    //skip bytes
+    final content_records = (file.Length / 512).ceil();
+    if (content_records != 0) {
+      await reader.read(content_records * 512);
+    }
+  }
 }
 
-TarFile _parseHeader(List<int> bytes) {
+TarFile _createFile(List<int> bytes) {
   if (bytes.length != 512) {
     throw Exception('Invalid header record length');
   }
@@ -43,4 +61,11 @@ TarFile _parseHeader(List<int> bytes) {
   var lenString = String.fromCharCodes(lenBytes).trim();
   f.Length = int.parse(lenString, radix: 8);
   return f;
+}
+
+bool _isRecordEmpty(List<int> record) {
+  for (var byte in record) {
+    if (byte != 0) return false;
+  }
+  return true;
 }
