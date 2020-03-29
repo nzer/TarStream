@@ -1,20 +1,17 @@
-import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:DartTarStream/StreamReader.dart';
+import 'package:chunked_stream/chunked_stream.dart';
 
 import 'TarFile.dart';
 
 Stream<TarFile> createStream(Stream<List<int>> stream) async* {
-  final reader = StreamReader(stream);
-  final headerBytes = await reader.ReadBytes(512);
+  final reader = ChunkedStreamIterator(stream);
+  final headerBytes = await reader.read(512);
   var file = _parseHeader(headerBytes);
   yield file;
 }
 
-TarFile _parseHeader(Uint8List bytes) {
-  if (bytes.lengthInBytes != 512) {
-    // throw error
+TarFile _parseHeader(List<int> bytes) {
+  if (bytes.length != 512) {
+    throw Exception('Invalid header record length');
   }
   /*  File Header (512 bytes)
    *  Offset Size Field
