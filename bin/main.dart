@@ -3,10 +3,11 @@ import 'dart:io';
 import 'package:DartTarStream/DartTarStream.dart' as DartTarStream;
 
 void main(List<String> arguments) async {
-  final file = File('ustar.tar');
+  final file = File('7z.tar');
   final fileStream = file.openRead();
   final tarStream = DartTarStream.createStream(fileStream);
-  final tarFile = await tarStream.single;
-  print(tarFile.Name);
-  print(tarFile.Length);
+  await for (var item in tarStream) {
+    print(item.Name);
+    print(item.Length);
+  }
 }
