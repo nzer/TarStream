@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:DartTarStream/DartTarStream.dart' as DartTarStream;
 
 void main(List<String> arguments) async {
-  final arc = File("C:\\Projects\\DartTarStream\\ustar.tar");
-  final sss = arc.openRead();
-  final tarStream = DartTarStream.createStream(sss);
-  final tf = await tarStream.single;
-  print(tf.Name);
-  print(tf.Length);
+  final file = File("C:\\Projects\\DartTarStream\\ustar.tar");
+  final fileStream = file.openRead();
+  final tarStream = DartTarStream.createStream(fileStream);
+  final tarFile = await tarStream.single;
+  print(tarFile.Name);
+  print(tarFile.Length);
 }
