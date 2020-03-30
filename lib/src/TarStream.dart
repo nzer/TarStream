@@ -17,12 +17,16 @@ class TarStream {
       }
       assert(headerBytes.length == 512);
       var file = _createFile(headerBytes);
-      file._contentStream = reader.substream(file.Length); //TODO: handle zero length (hardlinks, etc)
+      if (file.Length != 0) {
+        file._contentStream = reader.substream(file.Length);
+      } else {
+        file._contentStream = Stream.empty();
+      }
       yield file;
       //skip bytes
       if (!file._contentStreamAcquired) {
-          //read content
-          await file._contentStream.drain();
+        //read content
+        await file._contentStream.drain();
       }
       // read record leftovers
       final content_records = (file.Length / 512).ceil();
