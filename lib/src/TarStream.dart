@@ -1,6 +1,6 @@
 import 'package:chunked_stream/chunked_stream.dart';
 
-import 'TarFile.dart';
+part 'TarFile.dart';
 
 class TarStream {
   static Stream<TarFile> fromStream(Stream<List<int>> stream) async* {
@@ -15,16 +15,19 @@ class TarStream {
       if (empty_records == 2) {
         break;
       }
-      if (headerBytes.length != 512) {
-        throw Exception('Invalid record length');
-      }
+      assert(headerBytes.length == 512);
       var file = _createFile(headerBytes);
-      
+      file._contentStream = reader.substream(file.Length); //TODO: handle zero length (hardlinks, etc)
       yield file;
       //skip bytes
+      if (!file._contentStreamAcquired) {
+          //read content
+          await file._contentStream.drain();
+      }
+      // read record leftovers
       final content_records = (file.Length / 512).ceil();
       if (content_records != 0) {
-        await reader.read(content_records * 512);
+        await reader.read(content_records * 512 - file.Length);
       }
     }
   }

@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'dart:convert';
 import 'package:tar_stream/tar_stream.dart';
 import 'package:test/test.dart';
 
@@ -22,5 +22,7 @@ void testTar(String filename) async {
   await for (var item in tarStream) {
     print(item.Name);
     print(item.Length);
+    var v = await item.contentStream.transform(utf8.decoder).first;
+    print(v);
   }
 }
