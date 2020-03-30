@@ -22,7 +22,9 @@ void testTar(String filename) async {
   await for (var item in tarStream) {
     print(item.Name);
     print(item.Length);
-    var v = await item.contentStream.transform(utf8.decoder).first;
-    print(v);
+    var lines = await item.contentStream.transform(utf8.decoder).toList();
+    for (var line in lines) {
+      print(line);
+    }
   }
 }
