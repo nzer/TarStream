@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:DartTarStream/DartTarStream.dart' as DartTarStream;
+import 'package:tar_stream/tar_stream.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -18,7 +18,7 @@ void main() {
 void testTar(String filename) async {
   final file = File(filename);
   final fileStream = file.openRead();
-  final tarStream = DartTarStream.createStream(fileStream);
+  final tarStream = TarStream.fromStream(fileStream);
   await for (var item in tarStream) {
     print(item.Name);
     print(item.Length);
