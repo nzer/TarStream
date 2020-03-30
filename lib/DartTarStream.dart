@@ -55,11 +55,21 @@ TarFile _createFile(List<int> bytes) {
   var f = TarFile();
 
   var nameBytes = bytes.sublist(0, 100);
+  nameBytes.retainWhere((c) => c >= 32 && c <= 122);
   f.Name = String.fromCharCodes(nameBytes).trim();
 
   var lenBytes = bytes.sublist(124, 124 + 12 - 1);
   var lenString = String.fromCharCodes(lenBytes).trim();
   f.Length = int.parse(lenString, radix: 8);
+
+  var ustarBytes = bytes.sublist(257, 257 + 6 - 1);
+  var ustarString = String.fromCharCodes(ustarBytes).trim();
+  if (ustarString == 'ustar') {
+    var nameBytes = bytes.sublist(345, 345 + 155 - 1);
+    nameBytes.retainWhere((c) => c >= 32 && c <= 122);
+    f.Name = String.fromCharCodes(nameBytes).trim() + '/' + f.Name;
+  }
+
   return f;
 }
 
